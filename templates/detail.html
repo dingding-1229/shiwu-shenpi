@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ req.doc_no }} — 事务审批系统{% endblock %}
+{% block body %}
+<article class="doc">
+  {% if req.status == 'approved' %}
+  <div class="stamp approved" aria-hidden="true">已通过</div>
+  {% elif req.status == 'rejected' %}
+  <div class="stamp rejected" aria-hidden="true">已驳回</div>
+  {% endif %}
+  <div class="doc-head">
+    <div class="doc-org">事务审批系统</div>
+    <h2>事　务　审　批　单</h2>
+    <div class="doc-no">{{ req.doc_no }}</div>
+  </div>
+  <table class="doc-table">
+    <tr>
+      <th>申请类型</th><td>{{ TYPE_LABELS.get(req.type, req.type) }}</td>
+      <th>当前状态</th><td>{{ STATUS_LABELS.get(req.status, req.status) }}</td>
+    </tr>
+    <tr>
+      <th>申请人</th><td>{{ req.applicant_name }}</td>
+      <th>呈报时间</th><td>{{ fmt_time(req.created_at) }}</td>
+    </tr>
+    <tr>
+      <th>{{ ITEM_LABELS.get(req.type, '申请事项') }}</th>
+      <td colspan="3">{{ req.item }}</td>
+    </tr>
+    {% if req.type == TYPE_EAT %}
+    <tr>
+      <th>进食时间</th>
+      <td colspan="3">{{ fmt_time(req.eat_time) }}</td>
+    </tr>
+    {% elif req.type == TYPE_SPEND %}
+    <tr>
+      <th>金额</th>
+      <td colspan="3">{{ fmt_amount(req.amount) }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+      <th>申请理由</th>
+      <td colspan="3" class="reason">{{ req.reason }}</td>
+    </tr>
+    <tr>
+      <th>办结时间</th>
+      <td colspan="3">{{ fmt_time(req.finished_at) }}</td>
+    </tr>
+  </table>
+  <h3 class="chain-title">审批链（逐级签批）</h3>
+  <table class="dense chain">
+    <thead>
+      <tr>
+        <th>次序</th>
+        <th>审批人</th>
+        <th>状态</th>
+        <th>签字 / 意见</th>
+        <th>签批时间</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in steps %}
+      <tr>
+        <td>第 {{ s.seq }} 级</td>
+        <td>{{ s.username }}</td>
+        <td>
+          {% if s.status == 'waiting' %}待前级办理
+          {% elif s.status == 'current' %}待签批
+          {% elif s.status == 'approved' %}同意
+          {% elif s.status == 'rejected' %}驳回
+          {% else %}{{ s.status }}{% endif %}
+        </td>
+        <td class="sign">
+          {% if s.status in ('approved','rejected') %}
+            <span class="sign-name">{{ s.username }}</span>
+            {% if s.comment %}<div class="opinion">{{ s.comment }}</div>{% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ fmt_time(s.acted_at) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if my_current %}
+  <form method="post" action="{{ url_for('decide', rid=req.id) }}" class="form decide">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h3 class="chain-title">本级签批</h3>
+    <label>审批意见（选填）
+      <textarea name="comment" maxlength="500" rows="3" placeholder="可填写同意或驳回的具体意见"></textarea>
+    </label>
+    <div class="actions">
+      <button type="submit" name="action" value="approve" class="btn primary">同　意</button>
+      <button type="submit" name="action" value="reject" class="btn danger" onclick="return confirm('确定驳回本件？驳回后即归档。')">驳　回</button>
+    </div>
+  </form>
+  {% endif %}
+  <p class="back"><a href="{{ url_for('workbench') }}">← 返回办事台</a></p>
+</article>
+{% endblock %}

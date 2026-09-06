@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}办事台 — 事务审批系统{% endblock %}
+{% block body %}
+<div class="toolbar">
+  <h2 class="work-title">办事台</h2>
+  <a class="btn primary" href="{{ url_for('new_request') }}">＋ 呈报新申请</a>
+</div>
+<nav class="tabs">
+  <a class="tab {% if tab=='mine' %}on{% endif %}" href="{{ url_for('workbench', tab='mine') }}">我发起的申请 <span>{{ counts.mine }}</span></a>
+  <a class="tab {% if tab=='pending' %}on{% endif %}" href="{{ url_for('workbench', tab='pending') }}">待我审批 <span>{{ counts.pending }}</span></a>
+  <a class="tab {% if tab=='archive' %}on{% endif %}" href="{{ url_for('workbench', tab='archive') }}">已归档 <span>{{ counts.archive }}</span></a>
+</nav>
+<div class="table-wrap">
+  <table class="dense">
+    <thead>
+      <tr>
+        <th>文号</th>
+        <th>类型</th>
+        <th>事项</th>
+        <th>申请人</th>
+        <th>状态</th>
+        <th>呈报时间</th>
+        <th>办结时间</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="mono">{{ r.doc_no }}</td>
+        <td>{{ TYPE_LABELS.get(r.type, r.type) }}</td>
+        <td class="item">{{ r.item }}</td>
+        <td>{{ r.applicant_name }}</td>
+        <td><span class="badge {{ r.status }}">{{ STATUS_LABELS.get(r.status, r.status) }}</span></td>
+        <td>{{ fmt_time(r.created_at) }}</td>
+        <td>{{ fmt_time(r.finished_at) }}</td>
+        <td><a href="{{ url_for('detail', rid=r.id) }}">查阅</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="empty">暂无记录。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

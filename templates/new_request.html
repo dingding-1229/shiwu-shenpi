@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}呈报申请 — 事务审批系统{% endblock %}
+{% block body %}
+<section class="panel">
+  <h2 class="panel-title">呈报内部事务申请</h2>
+  <p class="hint">请据实填写。审批人按填写顺序逐级签批；前一人同意后，后一人方可办理。</p>
+  <form method="post" class="form" id="apply-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <fieldset class="type-pick">
+      <legend>申请类型</legend>
+      <label class="radio"><input type="radio" name="type" value="eat" required> 进食申请</label>
+      <label class="radio"><input type="radio" name="type" value="spend"> 花费申请</label>
+    </fieldset>
+
+    <div id="eat-fields" class="type-fields" hidden>
+      <label>想吃什么
+        <input type="text" name="item_eat" maxlength="200" placeholder="例如：红烧排骨、食堂套餐">
+      </label>
+      <label>进食时间
+        <input type="datetime-local" name="eat_time">
+      </label>
+    </div>
+
+    <div id="spend-fields" class="type-fields" hidden>
+      <label>想买什么
+        <input type="text" name="item_spend" maxlength="200" placeholder="例如：办公笔记本一支">
+      </label>
+      <label>金额（元）
+        <input type="number" name="amount" step="0.01" min="0.01" max="10000000" placeholder="例如：128.00">
+      </label>
+    </div>
+
+    <label>申请理由
+      <textarea name="reason" required maxlength="2000" rows="5" placeholder="请说明事由、必要性及拟办意见"></textarea>
+    </label>
+    <label>审批人（其他已注册用户，多个用逗号分隔，按先后顺序逐级审批）
+      <input type="text" name="approvers" required placeholder="例如：张三,李四">
+    </label>
+    {% if others %}
+    <p class="hint small">现有其他用户：{% for u in others %}<code>{{ u.username }}</code>{% if not loop.last %}、{% endif %}{% endfor %}</p>
+    {% else %}
+    <p class="hint small warn">目前尚无其他注册用户。请先请同事开通账号后再指定审批人。</p>
+    {% endif %}
+    <div class="actions">
+      <button type="submit" class="btn primary">呈　报</button>
+      <a class="btn ghost" href="{{ url_for('workbench') }}">返回办事台</a>
+    </div>
+  </form>
+</section>
+<script>
+(function () {
+  const form = document.getElementById("apply-form");
+  const eat = document.getElementById("eat-fields");
+  const spend = document.getElementById("spend-fields");
+  function sync() {
+    const t = (form.querySelector('input[name="type"]:checked') || {}).value;
+    eat.hidden = t !== "eat";
+    spend.hidden = t !== "spend";
+    eat.querySelector('[name="item_eat"]').required = t === "eat";
+    eat.querySelector('[name="eat_time"]').required = t === "eat";
+    spend.querySelector('[name="item_spend"]').required = t === "spend";
+    spend.querySelector('[name="amount"]').required = t === "spend";
+  }
+  form.querySelectorAll('input[name="type"]').forEach(el => el.addEventListener("change", sync));
+  sync();
+})();
+</script>
+{% endblock %}

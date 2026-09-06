@@ -1,0 +1,17 @@
+[Unit]
+Description=DDMAXXING OA Flask (点点玛克星内部事务审批系统)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/ddmaxxing-oa
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/ddmaxxing-oa/venv/bin/gunicorn --workers 1 --threads 4 --bind 127.0.0.1:8000 --timeout 60 wsgi:app
+Restart=on-failure
+RestartSec=3
+RestartPreventExitStatus=0
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}注册 — 事务审批系统{% endblock %}
+{% block body %}
+<section class="panel narrow">
+  <h2 class="panel-title">开通内部账号</h2>
+  <p class="hint">用户名须唯一。密码不少于 4 个字符。注册后即可登录呈报申请。</p>
+  <form method="post" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>用户名
+      <input type="text" name="username" required maxlength="32" autocomplete="username" autofocus>
+    </label>
+    <label>密码
+      <input type="password" name="password" required minlength="4" autocomplete="new-password">
+    </label>
+    <label>确认密码
+      <input type="password" name="password2" required minlength="4" autocomplete="new-password">
+    </label>
+    <button type="submit" class="btn primary">提请开通</button>
+  </form>
+  <p class="form-foot">已有账号？<a href="{{ url_for('index') }}">返回登录</a></p>
+</section>
+{% endblock %}

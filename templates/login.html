@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}登录 — 事务审批系统{% endblock %}
+{% block body %}
+<div class="auth-grid">
+  <section class="panel notice">
+    <h2 class="panel-title">办事须知</h2>
+    <ol class="rules">
+      <li>本平台办理进食、花费等内部事务审批。</li>
+      <li>申请须指定一名或多名审批人，按所列顺序逐级签批。</li>
+      <li>任一审批人驳回即办结归档；全部同意后方可通过。</li>
+      <li>申请人不得审批本人事项。请妥善保管账号。</li>
+    </ol>
+  </section>
+  <section class="panel">
+    <h2 class="panel-title">工作人员登录</h2>
+    <form method="post" action="{{ url_for('login') }}" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>用户名
+        <input type="text" name="username" required maxlength="32" autocomplete="username" autofocus>
+      </label>
+      <label>密码
+        <input type="password" name="password" required minlength="4" autocomplete="current-password">
+      </label>
+      <button type="submit" class="btn primary">登　录</button>
+    </form>
+    <p class="form-foot">尚无账号？<a href="{{ url_for('register') }}">申请开通（注册）</a></p>
+  </section>
+</div>
+{% endblock %}

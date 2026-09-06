@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — 事务审批系统{% endblock %}
+{% block body %}
+<section class="panel narrow">
+  <h2 class="panel-title">系统提示　{{ code }}</h2>
+  <p>{{ msg }}</p>
+  <p class="form-foot"><a href="{{ url_for('index') }}">返回首页</a></p>
+</section>
+{% endblock %}
